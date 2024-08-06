@@ -16,6 +16,9 @@ from datasets import load_dataset
 from trl import DPOTrainer
 
 
+# os.environ['CUDA_VISIBLE_DEVICES'] = '0,2,3,4'
+
+
 def load_config(train_args_path):
     # 根据config_option加载相应的配置
     module_path = train_args_path.replace("/", ".").rstrip(".py")
@@ -80,7 +83,7 @@ def create_tokenizer(args):
         tokenizer.pad_token_id = tokenizer.eod_id
         tokenizer.bos_token_id = tokenizer.eod_id
         tokenizer.eos_token_id = tokenizer.eod_id
-    if tokenizer.bos_token is None:   # qwen没有bos_token，要设置一下，不然dpo train时会报错。
+    if tokenizer.bos_token is None:  # qwen没有bos_token，要设置一下，不然dpo train时会报错。
         tokenizer.add_special_tokens({"bos_token": tokenizer.eos_token})
         tokenizer.bos_token_id = tokenizer.eos_token_id
 
@@ -101,7 +104,8 @@ def create_model(args, train_args):
         torch_dtype=torch_dtype,
         use_cache=False if train_args.gradient_checkpointing else True,  # The cache is only used for generation,
         # fix bug
-        # device_map='auto'
+        # device_map='auto',  # 'cuda:0',
+        # max_memory={0: "40GiB", 2: "40GiB", 3: "40GiB", 4: "40GiB"}
     )
 
     def load_model(model_kwargs):
@@ -178,7 +182,9 @@ def load_dpo_dataset(args, tokenizer):
         if tokenizer.chat_template is None:
             tokenizer.chat_template = "{% for message in messages %}{{message['role'] + ': ' + message['content'] + '\n\n'}}{% endfor %}{{ eos_token }}"
         train_dataset = load_dataset(data_files=args.train_data_path, path='json')
-
+        # print('------------------------')
+        # print(train_dataset)
+        # print('--------------------------')
         def process(row):
             row["chosen"] = tokenizer.apply_chat_template(row["chosen"], tokenize=False)
             row["rejected"] = tokenizer.apply_chat_template(row["rejected"], tokenize=False)
@@ -186,6 +192,9 @@ def load_dpo_dataset(args, tokenizer):
 
         train_dataset = train_dataset.map(process)
         train_dataset = train_dataset['train']
+        # print('--------------------------')
+        # print(train_dataset)
+        # print('--------------------------')
         return train_dataset
     # 使用自己构建的dpo dataset，用于自己科研或魔改使用。
     elif args.task_type == 'dpo_single':

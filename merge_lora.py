@@ -2,17 +2,18 @@ from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 # base模型和lora训练后保存模型的位置
-base_model_path = 'download_llm/LLM-Research/Phi-3-mini-128k-instruct'
-lora_path = '/LLM-out/checkpoint-616'
+base_model_path = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/Qwen-VL-Chat'
+lora_path = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/Qwen-VL-Chat/hzm_qwen_finetune/diagnose/20240801-184826/'
 # 合并后整个模型的保存地址
-merge_output_dir = 'merged_lora_model'
+merge_output_dir = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/qwen-dpo/input-model/v2'
 
 tokenizer = AutoTokenizer.from_pretrained(base_model_path)
 base_model = AutoModelForCausalLM.from_pretrained(
     base_model_path,
-    device_map="cuda",
+    device_map="cuda:0",
     torch_dtype="auto",
     trust_remote_code=True,
+    bf16=True
 )
 
 lora_model = PeftModel.from_pretrained(base_model, lora_path)
