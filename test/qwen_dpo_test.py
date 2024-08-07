@@ -12,8 +12,9 @@ def main(args):
     dir_id = args.dir_id
 
     token_dir = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/Qwen-VL-Chat/'
-    base_model_dir = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/Qwen-VL-Chat/hzm_qwen_finetune/diagnose/' + dir_id
-    dpo_model_dir = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/qwen-dpo/output-model/checkpoint-1430'
+    # base_model_dir = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/Qwen-VL-Chat/hzm_qwen_finetune/diagnose/' + dir_id
+    base_model_dir = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/qwen-dpo/input-model/v2'
+    dpo_model_dir = '/data1/llm/houzm/98-model/01-qwen-vl-chat/qwen/qwen-dpo/output-model/result_10/checkpoint-1430'
     diagnose_test_dataset_json = '/data1/llm/houzm/99-code/01-Qwen-VL/ai_doctor/data/data_finetune/dpo/dpo_test_dataset.json'
     diagnose_test_label_json = '/data1/llm/houzm/99-code/01-Qwen-VL/ai_doctor/data/data_finetune/dpo/dpo_test_label.json'
 
@@ -37,7 +38,7 @@ def main(args):
 
     # tokenizer = AutoTokenizer.from_pretrained(base_model_dir, trust_remote_code=True)
     base_model = AutoModelForCausalLM.from_pretrained(
-        token_dir,
+        base_model_dir,
         device_map="cuda:0",
         torch_dtype="auto",
         trust_remote_code=True,
